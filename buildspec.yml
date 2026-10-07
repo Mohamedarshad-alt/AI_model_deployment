@@ -1,0 +1,18 @@
+version: 0.2
+
+phases:
+
+  pre_build:
+    commands:
+      - echo "Starting AI application build..."
+      - python --version
+      - docker --version
+
+  build:
+    commands:
+      - echo "Building Docker image..."
+      - docker build -t house-price-ai:$CODEBUILD_BUILD_NUMBER .
+
+  post_build:
+    commands:
+      - echo "Build completed successfully!"
