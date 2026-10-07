@@ -8,11 +8,24 @@ phases:
       - python --version
       - docker --version
 
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 788516091241.dkr.ecr.ap-south-1.amazonaws.com
+
+      - REPOSITORY_URI=788516091241.dkr.ecr.ap-south-1.amazonaws.com/house-price-ai
+      - IMAGE_TAG=$CODEBUILD_BUILD_NUMBER
+
   build:
     commands:
       - echo "Building Docker image..."
-      - docker build -t house-price-ai:$CODEBUILD_BUILD_NUMBER .
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+
+      - echo "Tagging image as latest..."
+      - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest
 
   post_build:
     commands:
-      - echo "Build completed successfully!"
+      - echo "Pushing Docker image to ECR..."
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
+
+      - echo "Build and push completed successfully!"
